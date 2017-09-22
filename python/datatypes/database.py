@@ -64,7 +64,7 @@ class recoBase(dataBase):
             thisPlane = view.plane()
             if len(self._drawnObjects) > thisPlane:
                 for item in self._drawnObjects[thisPlane]:
-                    view._view.removeItem(item)
+                    view._plot.removeItem(item)
 
         # clear the list:
         self._drawnObjects = []
