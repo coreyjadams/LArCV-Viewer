@@ -79,6 +79,10 @@ class evd_manager_base(QtCore.QObject):
 
         for x in xrange(larcv.kProductUnknown):    
             self._data_product_rmap.update({larcv.ProductName(x)  : x })
+            # print larcv.ProductName(x), ": \r"
+            # for val in self._io_manager.producer_list(x):
+            #     print val + " \r"
+            # print
 
         print self._data_product_rmap
 
@@ -199,7 +203,7 @@ class evd_manager_2D(evd_manager_base):
         if product in self._drawnClasses:
             self._drawnClasses[product].setProducer(producer)
             self._drawnClasses[product].clearDrawnObjects(view_manager)
-            self._drawnClasses[product].drawObjects(view_manager)
+            self._drawnClasses[product].drawObjects(view_manager, self._io_manager)
             return
 
         # Now, draw the new product
