@@ -80,6 +80,14 @@ class viewport(pg.GraphicsLayoutWidget):
     self._widget = QtGui.QWidget()
     self._widget.setLayout(self._totalLayout)
 
+  def falseColor(self, apply_fc):
+    if apply_fc:
+      self._activeMap = self._colorMap
+    else:
+      self._activeMap = self._bwMap
+    self._cmap.restoreState(self._activeMap)
+    self.refreshGradient()
+
   def restoreDefaults(self):
     self._lowerLevel.setText(str(self._geometry.getLevels(self._plane)[0]))
     self._upperLevel.setText(str(self._geometry.getLevels(self._plane)[1]))
@@ -185,9 +193,9 @@ class viewport(pg.GraphicsLayoutWidget):
     return self._plane
 
   def lockRatio(self, lockAR ):
-    ratio = self._geometry.aspectRatio()
+    ratio = (self._x_max_range[1] - self._x_max_range[0]) / (self._y_max_range[1] - self._y_max_range[0])
     if lockAR:
-      self._plot.setAspectLocked(True, ratio=1.0)
+      self._plot.setAspectLocked(True, ratio=ratio)
     else:
       self._plot.setAspectLocked(False)
 

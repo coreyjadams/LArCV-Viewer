@@ -23,6 +23,18 @@ class event_meta(object):
     def meta(self, plane):
         return self._image_metas[plane]
 
+    def row_to_wire(self, row, plane):
+        return self._image_metas[plane].pos_x(row)
+
+    def col_to_time(self, col, plane):
+        return self._image_metas[plane].pos_y(col)
+
+    def wire_to_col(self, wire, plane):
+        return  (wire - self._image_metas[plane].tl().x) / self._image_metas[plane].pixel_width()
+
+    def time_to_row(self, time, plane):
+        return  (self._image_metas[plane].tl().y - time) / self._image_metas[plane].pixel_height()
+        # return self._image_metas[plane].row(time)
 
     def range(self, plane):
         if plane in self._image_metas.keys():
@@ -45,7 +57,6 @@ class evd_manager_base(QtCore.QObject):
         super(evd_manager_base, self).__init__()
         QtCore.QObject.__init__(self)
 
-        print config
 
         # For the larcv manager, using the IOManager to get at the data
         self._driver =  larcv.ProcessDriver('ProcessDriver')
@@ -72,7 +83,6 @@ class evd_manager_base(QtCore.QObject):
                 flist.push_back(_file)
                 self._driver.override_input_file(flist)
 
-        print self._driver
         self._driver.initialize()
 
         self._data_product_rmap = dict()
@@ -84,19 +94,8 @@ class evd_manager_base(QtCore.QObject):
             #     print val + " \r"
             # print
 
-        print self._data_product_rmap
-
         self.refresh_meta()
-        # Testing imagemeta access:
-        # meta = _event_image2d.at(0).meta()
-        # print "TL: ({}, {}), BL: {}, TR: {}, BR: {}".format(meta.tl().x, meta.tl().y,
-        #                                                     meta.bl().x, meta.bl().y,
-        #                                                     meta.tr().x, meta.tr().y,
-        #                                                     meta.br().x, meta.br().y)
 
-        print self.range(0)
-        print self.range(1)
-        print self.range(2)
 
     def refresh_meta(self):
         # Read in any of the image2d products if none is specified.
@@ -192,18 +191,18 @@ class evd_manager_2D(evd_manager_base):
     # when the producer changes
     def redrawProduct(self, product, producer, view_manager):
         
-        print "Received request to redraw ", product, " by ",producer
+        # print "Received request to redraw ", product, " by ",producer
         # First, determine if there is a drawing process for this product:  
         
         if producer is None:
             if product in self._drawnClasses:
-                self._drawnClasses[name].clearDrawnObjects(view_manager)
+                self._drawnClasses[product].clearDrawnObjects(view_manager)
                 self._drawnClasses.pop(product)
             return
         if product in self._drawnClasses:
             self._drawnClasses[product].setProducer(producer)
             self._drawnClasses[product].clearDrawnObjects(view_manager)
-            self._drawnClasses[product].drawObjects(view_manager, self._io_manager)
+            self._drawnClasses[product].drawObjects(view_manager, self._io_manager, self.meta())
             return
 
         # Now, draw the new product
@@ -216,7 +215,7 @@ class evd_manager_2D(evd_manager_base):
             self._drawnClasses.update({product: drawingClass})
 
             # Need to process the event
-            drawingClass.drawObjects(view_manager, self._io_manager)
+            drawingClass.drawObjects(view_manager, self._io_manager, self.meta())
 
 
     def clearAll(self, view_manager):
@@ -226,14 +225,13 @@ class evd_manager_2D(evd_manager_base):
 
     def drawFresh(self, view_manager):
 
-        print "drawFresh called."
         self.clearAll(view_manager)
         # Draw objects in a specific order defined by drawableItems
         order = self._drawableItems.getListOfTitles()
         # self.drawTruth()
         for item in order:
             if item in self._drawnClasses:
-                self._drawnClasses[item].drawObjects(view_manager, self._io_manager)
+                self._drawnClasses[item].drawObjects(view_manager, self._io_manager, self.meta())
 
 
 
@@ -273,7 +271,7 @@ try:
                 self._drawnClasses[name].setProducer(producer)
                 self.processEvent(True)
                 self._drawnClasses[name].clearDrawnObjects(self._view_manager)
-                self._drawnClasses[name].drawObjects(self._view_manager)
+                self._drawnClasses[name].drawObjects(self._view_manager, self.meta())
                 return
 
 
@@ -299,7 +297,7 @@ try:
                     self._drawnClasses[name].toggleMCCosmic(self.showMCCosmic)
                 # Need to process the event
                 self.processEvent(True)
-                drawingClass.drawObjects(self._view_manager)
+                drawingClass.drawObjects(self._view_manager, self.meta())
 
         def clearAll(self):
             for recoProduct in self._drawnClasses:
@@ -321,7 +319,7 @@ try:
             order=self._drawableItems.getListOfTitles()
             for item in order:
                 if item in self._drawnClasses:
-                    self._drawnClasses[item].drawObjects(self._view_manager)
+                    self._drawnClasses[item].drawObjects(self._view_manager, self.meta())
 
 
 except:

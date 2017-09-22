@@ -116,6 +116,10 @@ class gui(QtGui.QWidget):
     self._lockAspectRatio.setToolTip("Lock the aspect ratio to 1:1")
     self._lockAspectRatio.stateChanged.connect(self.lockARWorker)
 
+    self._falseColorSelection = QtGui.QCheckBox("False Color")
+    self._falseColorSelection.setToolTip("Applies a false color scheme to images")
+    self._falseColorSelection.stateChanged.connect(self.falseColorWorker)
+
     # add a box to restore the drawing defaults:
     self._restoreDefaults = QtGui.QPushButton("Restore Defaults")
     self._restoreDefaults.setToolTip("Restore the drawing defaults of the views.")
@@ -127,6 +131,7 @@ class gui(QtGui.QWidget):
     self._drawingControlBox.addWidget(self._restoreDefaults)
     self._drawingControlBox.addWidget(self._maxRangeButton)
     self._drawingControlBox.addWidget(self._lockAspectRatio)
+    self._drawingControlBox.addWidget(self._falseColorSelection)
 
     return self._drawingControlBox
 
@@ -153,6 +158,14 @@ class gui(QtGui.QWidget):
       self._view_manager.lockAR(True)
     else:
       self._view_manager.lockAR(False)
+
+  def falseColorWorker(self):
+    if self._falseColorSelection.isChecked():
+      for view in self._view_manager.getViewPorts():
+        view.falseColor(True)
+    else:
+      for view in self._view_manager.getViewPorts():
+        view.falseColor(False)
 
   def restoreDefaultsWorker(self):
     self._view_manager.restoreDefaults()
