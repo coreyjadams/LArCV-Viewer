@@ -1,20 +1,4 @@
-# import hit
-# # import match
-# import shower
-# import track
-# import wire
-# import cluster
-# import endpoint2d
-# import vertex
-# import mctrack
-# import mcshower
-# import spacepoint
-# import simch
-# import opflash
-# import seed
-# import pfpart
-# import neutrino
-# import numuselection
+from image2d import image2d
 
 # This is the class that maintains the list of drawable items.
 # If your class isn't here, it can't be drawn
@@ -30,17 +14,7 @@ class drawableItems(object):
         super(drawableItems, self).__init__()
         # items are stored as pointers to the classes (not instances)
         self._drawableClasses = collections.OrderedDict()
-        # self._drawableClasses.update({'Hit': [hit.hit,"recob::Hit"]})
-        # self._drawableClasses.update({'Cluster': [cluster.cluster,"recob::Cluster"]})
-        # # self._drawableClasses.update({'Match': [match.match,"pfpart"]})
-        # self._drawableClasses.update({'Shower': [shower.shower,"recob::Shower"]})
-        # self._drawableClasses.update({'Track': [track.track,"recob::Track"]})
-        # self._drawableClasses.update({'MCTrack': [mctrack.mctrack,"sim::MCTrack"]})
-        # # # self._drawableClasses.update({'Neutrino': [neutrino.neutrino,"ass"]})
-        # self._drawableClasses.update({'Endpoint 2D': [endpoint2d.endpoint2d,"recob::EndPoint2D"]})
-        # self._drawableClasses.update({'Vertex': [vertex.vertex,"recob::Vertex"]})
-        # self._drawableClasses.update({'SPS': [spacepoint.spacepoint,"recob::SpacePoint"]})
-        # self._drawableClasses.update({'Numu Selection': [numuselection.numuselection, "recob::Trackrecob::Vertexvoidart::Assn"]})
+        self._drawableClasses.update({'Image2D': [image2d, 'image2d']})
 
     def getListOfTitles(self):
         return self._drawableClasses.keys()

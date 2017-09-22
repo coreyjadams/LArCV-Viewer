@@ -30,8 +30,9 @@ class gui(QtGui.QWidget):
     QtCore.QCoreApplication.instance().quit()
 
   def metaChanged(self, meta):
+    self._event_manager.refresh_meta()
     for view in self._view_manager.getViewPorts():
-      view.updateRange(meta.range(view.plane()))
+      view.updateRange(meta.meta(view.plane()))
 
   def update(self):
     # set the text boxes correctly:
@@ -45,7 +46,7 @@ class gui(QtGui.QWidget):
     self._subrunLabel.setText(subrunLabel)
     self.metaChanged(self._event_manager.meta())
     
-    self._view_manager.drawPlanes(self._event_manager)
+    self._event_manager.drawFresh(self._view_manager)
 
   # This function prepares the buttons such as prev, next, etc and returns a layout
   def getEventControlButtons(self):
@@ -315,9 +316,6 @@ class gui(QtGui.QWidget):
     self.master.addWidget(self.southLayout)
 
     self.setLayout(self.master)    
-
-    # ask the view manager to draw the planes:
-    self._view_manager.drawPlanes(self._event_manager)
 
 
     self.setGeometry(0, 0, 2400, 1600)

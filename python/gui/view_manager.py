@@ -88,11 +88,6 @@ class view_manager(QtCore.QObject):
     for view in self._drawerList:
       view.lockRatio(lockRatio)
 
-
-  def drawPlanes(self,event_manager):
-    for i in xrange(len(self._drawerList)):
-        self._drawerList[i].drawBlank()
-
  
 
 

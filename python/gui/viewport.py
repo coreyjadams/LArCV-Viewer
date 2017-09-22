@@ -27,6 +27,9 @@ class viewport(pg.GraphicsLayoutWidget):
     self._x_axis = self._plot.getAxis("bottom")
     self._y_axis = self._plot.getAxis("left")
 
+    self._x_max_range = (-1, 1)
+    self._y_max_range = (-1, 1)
+
     # Set up the blank data:
     self.setBackground('w')
 
@@ -131,19 +134,50 @@ class viewport(pg.GraphicsLayoutWidget):
     #   if self.q.y() > 0 and self.q.y() < self._geometry.tRange():
     self._statusBar.showMessage(message)
 
-  def updateRange(self, _range):
+  def updateRange(self, meta):
 
-    self._plot.setXRange(_range[0][0], _range[0][1])
-    self._plot.setYRange(_range[1][0], _range[1][1])
+    # create the sets of ticks to update the image with:
+    # Format is
+    # [
+    # [ (majorTickValue1, majorTickString1), (majorTickValue2, majorTickString2), ... ],
+    # [ (minorTickValue1, minorTickString1), (minorTickValue2, minorTickString2), ... ],
+    # ...
+    # ]
 
+    # Major ticks are the pixel widths, or 1
+    # Minor ticks are 1
+    x_major_tick_vals   = numpy.arange(meta.cols(), step=50)
+    self._x_max_range = (x_major_tick_vals[-1], x_major_tick_vals[0])
+    x_major_tick_labels = numpy.arange(meta.min_x(), meta.max_x(), 50*int(meta.pixel_width()))
+    x_major = numpy.column_stack((x_major_tick_vals, x_major_tick_labels))
+
+    x_minor_tick_vals = numpy.arange(int(meta.width()))
+    x_minor_tick_labels = numpy.arange(meta.min_x(), meta.max_x(), 1)
+    x_minor = numpy.column_stack((x_minor_tick_vals, x_minor_tick_labels))
+
+    x_ticks = [x_major, x_minor]
+
+    y_major_tick_vals   = numpy.arange(meta.rows(), step=50)
+    self._y_max_range = (y_major_tick_vals[-1], y_major_tick_vals[0])
+    y_major_tick_labels = numpy.arange(meta.min_y(), meta.max_y(), 50*int(meta.pixel_height()))
+    y_major = numpy.column_stack((y_major_tick_vals, y_major_tick_labels))
+    
+    y_minor_tick_vals = numpy.arange(int(meta.height()))
+    y_minor_tick_labels = numpy.arange(meta.min_y(), meta.max_y(), 1)
+    y_minor = numpy.column_stack((y_minor_tick_vals, y_minor_tick_labels))
+
+    y_ticks = [y_major, y_minor]
+
+    self._x_axis.setTicks(x_ticks)
+    self._y_axis.setTicks(y_ticks)
+
+    self.setRangeToMax()
 
   def connectStatusBar(self, _statusBar):
     self._statusBar = _statusBar
 
   def setRangeToMax(self):
-    xR = (-1, 1)
-    yR = (-1, 1)
-    self._plot.setRange(xRange=xR,yRange=yR, padding=0.002)
+    self._plot.setRange(xRange=self._x_max_range,yRange=self._y_max_range, padding=0.002)
 
 
 
