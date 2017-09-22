@@ -30,7 +30,7 @@ class pixel2d(recoBase):
         ]
 
     # this is the function that actually draws the cluster.
-    def drawObjects(self, view_manager, io_manager):
+    def drawObjects(self, view_manager, io_manager, meta):
 
         #Get the list of pixel2d sets:
         event_pixel2d = io_manager.get_data(3, str(self._producerName))
