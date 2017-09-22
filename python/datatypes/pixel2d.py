@@ -16,16 +16,16 @@ class pixel2d(recoBase):
 
         # Defining the pixel2d colors:
         self._clusterColors = [
-            (0, 147, 147),  # dark teal
-            (0, 0, 252),   # bright blue
-            (156, 0, 156),  # purple
-            (255, 0, 255),  # pink
-            (255, 0, 0),  # red
-            (175, 0, 0),  # red/brown
-            (252, 127, 0),  # orange
-            (102, 51, 0),  # brown
-            (127, 127, 127),  # dark gray
-            (210, 210, 210),  # gray
+            (0, 147, 147, 125),  # dark teal
+            (0, 0, 252, 125),   # bright blue
+            (156, 0, 156, 125),  # purple
+            (255, 0, 255, 125),  # pink
+            (255, 0, 0, 125),  # red
+            (175, 0, 0, 125),  # red/brown
+            (252, 127, 0, 125),  # orange
+            (102, 51, 0, 125),  # brown
+            (127, 127, 127, 125),  # dark gray
+            (210, 210, 210, 125),  # gray
             (100, 253, 0)  # bright green
         ]
 
@@ -34,8 +34,13 @@ class pixel2d(recoBase):
 
         #Get the list of pixel2d sets:
         event_pixel2d = io_manager.get_data(3, str(self._producerName))
-        print event_pixel2d
+        if self._producerName in io_manager.producer_list(1):
+            hasROI = True
+        else:
+            hasROI = False
 
+        if hasROI:    
+            event_roi = io_manager.get_data(1, str(self._producerName))
 
         for view in view_manager.getViewPorts():
             colorIndex = 0
@@ -58,8 +63,16 @@ class pixel2d(recoBase):
                 # Keep track of the cluster for drawing management
                 self._listOfClusters[thisPlane].append(cluster_box_coll)
 
+                # Get the matching ROI information:
+                _event_ID = cluster.ID()
+                if hasROI:
+                    label = event_roi.ROIArray().at(_event_ID).Type()
+                    cluster_box_coll.setLabel(label)
+
                 # draw the hits in this cluster:
                 cluster_box_coll.drawHits(view, cluster)
+
+
 
                 colorIndex += 1
                 if colorIndex >= len(self._clusterColors):

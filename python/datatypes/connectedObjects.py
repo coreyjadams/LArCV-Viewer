@@ -80,8 +80,8 @@ class boxCollection(QtCore.QObject):
         self._plane = -1
         self._listOfHits = []
         self._isHighlighted = False
-        self._params = None
         self._acceptHoverEvents = False
+        self._label = None
 
     def setColor(self, color):
         self._color = color
@@ -98,13 +98,15 @@ class boxCollection(QtCore.QObject):
         self.mouseExit.connect(other.hoverExit)
         self.highlightChange.connect(other.toggleHighlight)
 
+    def setLabel(self, label):
+        self._label = label
+
     def genToolTip(self):
-        if self._params == None:
-            nhits = len(self._listOfHits)
-            tip = "Hits: " + str(nhits)
-            return tip
-        else:
-            return self._params.toolTip()
+        nhits = len(self._listOfHits)
+        tip = "Hits: " + str(nhits)
+        if self._label is not None:
+            tip += "\nLabel: {}".format(self._label)
+        return tip
 
     def hoverEnter(self, e):
         for hit in self._listOfHits:
@@ -152,3 +154,4 @@ class boxCollection(QtCore.QObject):
         for pixel in self._listOfHits:
             view._plot.removeItem(pixel)
         self._listOfHits = []
+        self._label = None
