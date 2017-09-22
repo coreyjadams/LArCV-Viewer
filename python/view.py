@@ -12,9 +12,11 @@ from pyqtgraph.Qt import QtGui, QtCore
 
 from manager import evd_manager_2D
 
+import os
+
 # This is to allow key commands to work when focus is on a box
 
-
+from gui import evdgui
 
 
 def sigintHandler(*args):
@@ -35,20 +37,22 @@ def main():
 
     if args.config is None:
       print "No config supplied, using default configuration file."
-      args.config = os.environ("LARCV_VIEWER_TOPDIR") + "config/default.cfg"
-
-    print args
+      args.config = os.environ["LARCV_VIEWER_TOPDIR"] + "/config/default.cfg"
 
 
     # If a file was passed, give it to the manager:
 
-    manager = evd_manager_2D(args.file)
-    # manager.setInputFiles(args.file)
+    manager = evd_manager_2D(args.config, args.file)
 
-    exit()
 
-    # thisgui = evdgui(manager)
+    thisgui = evdgui()
+    thisgui.connect_manager(manager)
     # manager.goToEvent(0)
+    thisgui.initUI()
+
+    manager.eventChanged.connect(thisgui.update)
+    manager.metaRefreshed.connect(thisgui.metaChanged)
+
 
     signal.signal(signal.SIGINT, sigintHandler)
     timer = QtCore.QTimer()

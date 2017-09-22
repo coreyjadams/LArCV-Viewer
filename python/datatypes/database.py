@@ -38,7 +38,6 @@ class dataBase(object):
         super(dataBase, self).__init__()
         self._productName = "null"
         self._producerName = "null"
-        self._process = None
 
     def productName(self):
         return self._productName
@@ -60,9 +59,6 @@ class recoBase(dataBase):
         self._drawnObjects = []
         self._process = None
 
-    def init(self):
-        self._process.initialize()
-
     def clearDrawnObjects(self, view_manager):
         for view in view_manager.getViewPorts():
             thisPlane = view.plane()
@@ -73,58 +69,46 @@ class recoBase(dataBase):
         # clear the list:
         self._drawnObjects = []
 
-    # override set producer
-    def setProducer(self, producer):
-        self._producerName = producer
-        self._process.setProducer(str(producer))
-
     def getDrawnObjects(self):
         return self._drawnObjects
 
     def drawObjects(self, view_manager):
         pass
 
-    def getAutoRange(self, plane):
-        if self._process != None:
-            w = self._process.getWireRange(plane)
-            t = self._process.getTimeRange(plane)
-            return [w.first, w.second], [t.first, t.second]
-        return None, None
+# class recoBase3D(dataBase):
 
-class recoBase3D(dataBase):
+#     """docstring for recoBase3D"""
 
-    """docstring for recoBase3D"""
+#     def __init__(self):
+#         super(recoBase3D, self).__init__()
+#         self._drawnObjects = []
+#         self._process = None
 
-    def __init__(self):
-        super(recoBase3D, self).__init__()
-        self._drawnObjects = []
-        self._process = None
+#     def init(self):
+#         self._process.initialize()
 
-    def init(self):
-        self._process.initialize()
+#     def clearDrawnObjects(self, view_manager):
+#         view = view_manager.getView()
+#         for item in self._drawnObjects:
+#             view.removeItem(item)
+#         # clear the list:
+#         self._drawnObjects = []
 
-    def clearDrawnObjects(self, view_manager):
-        view = view_manager.getView()
-        for item in self._drawnObjects:
-            view.removeItem(item)
-        # clear the list:
-        self._drawnObjects = []
+#     # override set producer
+#     def setProducer(self, producer):
+#         self._producerName = producer
+#         self._process.setProducer(str(producer))
 
-    # override set producer
-    def setProducer(self, producer):
-        self._producerName = producer
-        self._process.setProducer(str(producer))
+#     def getDrawnObjects(self):
+#         return self._drawnObjects
 
-    def getDrawnObjects(self):
-        return self._drawnObjects
+#     def drawObjects(self, view_manager):
+#         pass
 
-    def drawObjects(self, view_manager):
-        pass
-
-    def getAutoRange(self, plane):
-        if self._process != None:
-            x = self._process.getXRange
-            y = self._process.getYRange
-            z = self._process.getZRange
-            return [x.first, x.second], [y.first, y.second], [z.first, z.second]
-        return None, None, None
+#     def getAutoRange(self, plane):
+#         if self._process != None:
+#             x = self._process.getXRange
+#             y = self._process.getYRange
+#             z = self._process.getZRange
+#             return [x.first, x.second], [y.first, y.second], [z.first, z.second]
+#         return None, None, None

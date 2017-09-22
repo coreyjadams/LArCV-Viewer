@@ -20,6 +20,9 @@ class event_meta(object):
             _meta = image2d.meta()
             self._image_metas[_meta.plane()] = _meta
 
+    def meta(self, plane):
+        return self._image_metas[plane]
+
 
     def range(self, plane):
         if plane in self._image_metas.keys():
@@ -71,12 +74,13 @@ class evd_manager_base(QtCore.QObject):
 
         print self._driver
         self._driver.initialize()
-        self._driver.batch_process(0,0)
 
         self._data_product_rmap = dict()
 
         for x in xrange(larcv.kProductUnknown):    
             self._data_product_rmap.update({larcv.ProductName(x)  : x })
+
+        print self._data_product_rmap
 
         self.refresh_meta()
         # Testing imagemeta access:
@@ -98,7 +102,6 @@ class evd_manager_base(QtCore.QObject):
         _event_image2d = self._io_manager.get_data(_id, _producer)
         
         self._meta.refresh(_event_image2d)
-        self.metaRefreshed.emit(self._meta)
 
     def meta(self):
         return self._meta
@@ -145,21 +148,21 @@ class evd_manager_base(QtCore.QObject):
     # override the functions from manager as needed here
     def next(self):
         if self.entry() + 1 < self.n_entries():
-            self._io_manager.process_event(self.entry() + 1)
+            self._driver.batch_process(self.entry() + 1, 1)
             self.eventChanged.emit()
         else:
             print "On the last event, can't go to next."
 
     def prev(self):
         if self.entry != 0:
-            self._io_manager.process_event(self.entry() - 1)
+            self._driver.batch_process(self.entry() - 1, 1)
             self.eventChanged.emit()
         else:
             print "On the first event, can't go to previous."
 
     def go_to_entry(self, entry):
         if entry >= 0 and entry < self.n_entries():
-            self._io_manager.process_event(entry)
+            self._driver.batch_process(entry, 1)
             self.eventChanged.emit()
         else:
             print "Can't go to entry {}, entry is out of range.".format(entry)
@@ -190,14 +193,13 @@ class evd_manager_2D(evd_manager_base):
         
         if producer is None:
             if product in self._drawnClasses:
-                self._drawnClasses[name].clearDrawnObjects(self._view_manager)
+                self._drawnClasses[name].clearDrawnObjects(view_manager)
                 self._drawnClasses.pop(product)
             return
         if product in self._drawnClasses:
             self._drawnClasses[product].setProducer(producer)
-            self.processEvent(True)
-            self._drawnClasses[product].clearDrawnObjects(self._view_manager)
-            self._drawnClasses[product].drawObjects(self._view_manager)
+            self._drawnClasses[product].clearDrawnObjects(view_manager)
+            self._drawnClasses[product].drawObjects(view_manager)
             return
 
         # Now, draw the new product
@@ -207,29 +209,27 @@ class evd_manager_2D(evd_manager_base):
             drawingClass=self._drawableItems.getDict()[product][0]()
 
             drawingClass.setProducer(producer)
-            self._processer.add_process(product, drawingClass._process)
             self._drawnClasses.update({product: drawingClass})
 
             # Need to process the event
-            self.processEvent(True)
-            drawingClass.drawObjects(self._view_manager, self._io_manager)
+            drawingClass.drawObjects(view_manager, self._io_manager)
 
 
-    def clearAll(self):
+    def clearAll(self, view_manager):
         for recoProduct in self._drawnClasses:
-            self._drawnClasses[recoProduct].clearDrawnObjects(
-                self._view_manager)
+            self._drawnClasses[recoProduct].clearDrawnObjects(view_manager)
         # self.clearTruth()
 
-    def drawFresh(self):
+    def drawFresh(self, view_manager):
 
-        self.clearAll()
+        print "drawFresh called."
+        self.clearAll(view_manager)
         # Draw objects in a specific order defined by drawableItems
         order = self._drawableItems.getListOfTitles()
         # self.drawTruth()
         for item in order:
             if item in self._drawnClasses:
-                self._drawnClasses[item].drawObjects(self._view_manager)
+                self._drawnClasses[item].drawObjects(view_manager, self._io_manager)
 
 
 
