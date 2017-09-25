@@ -26,8 +26,6 @@ class voxel3d(recoBase):
         voxels = event_voxel3d.GetVoxelSet()
         meta = event_voxel3d.GetVoxelMeta()
 
-        print meta.NumVoxelX()
-        print voxels.size()
 
         # using spheres at the moment:
         self._points = numpy.ndarray((voxels.size(), 3))
@@ -78,6 +76,5 @@ class voxel3d(recoBase):
         self._glPointsCollection = None
 
     def refresh(self, view_manager):
-        print "Refreshing"
         self.setColors(view_manager.getLookupTable(), view_manager.getLevels())
         self.redrawPoints(view_manager)
