@@ -58,7 +58,7 @@ class evd_manager_3D(evd_manager_base):
             # print
 
         self.refresh_meta()
-
+        
 
     def refresh_meta(self, producer=None):
         # Read in any of the image2d products if none is specified.
@@ -118,7 +118,6 @@ class evd_manager_3D(evd_manager_base):
 
 
     def refreshColors(self, view_manager):
-        print "refreshing here"
         order = self._drawableItems.getListOfTitles()
         for item in order:
             if item in self._drawnClasses:
