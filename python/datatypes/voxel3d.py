@@ -25,9 +25,8 @@ class voxel3d(recoBase):
 
         voxels = event_voxel3d.GetVoxelSet()
         meta = event_voxel3d.GetVoxelMeta()
-        print voxels
-        print meta
 
+        print meta.NumVoxelX()
         print voxels.size()
 
         # using spheres at the moment:
@@ -42,7 +41,7 @@ class voxel3d(recoBase):
             self._points[i][0] = _pos[0] - meta.MinX()
             self._points[i][1] = _pos[1] - meta.MinY()
             self._points[i][2] = _pos[2] - meta.MinZ()
-            self._values[i] = voxel.Value()*1000
+            self._values[i] = voxel.Value()
             i += 1
             # print voxel.Value()
 
