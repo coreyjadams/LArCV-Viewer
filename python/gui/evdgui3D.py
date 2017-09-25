@@ -1,38 +1,49 @@
-from gui import gui
+try:
+    import pyqtgraph.opengl as gl
+except:
+    print("ERROR: Must have opengl for this display.")
+
+from gui3D import gui3D
 from pyqtgraph.Qt import QtGui, QtCore
+from manager import evd_manager_3D
 
 from recobox import recoBox
-
 
 # Inherit the basic gui to extend it
 # override the gui to give the lariat display special features:
 
 
-class evdgui(gui):
+class evdgui3D(gui3D):
 
-    """special evd gui"""
+    """special larlite gui for 3D"""
 
     def __init__(self):
-        super(evdgui, self).__init__()
-        # self._event_manager.truthLabelChanged.connect(self.updateMessageBar)
+        super(evdgui3D, self).__init__()
+
+
+    def connect_manager(self, _manager):
+        self._event_manager = _manager
+        self._event_manager.eventChanged.connect(self.update)
+        self._view_manager.refreshColors.connect(self.refreshColors)
 
     # override the initUI function to change things:
     def initUI(self):
-        super(evdgui, self).initUI()
+        super(evdgui3D, self).initUI()
         # Change the name of the labels for lariat:
         self.update()
+
+    def refreshColors(self):
+        self._event_manager.refreshColors(self._view_manager)
 
     # This function sets up the eastern widget
     def getEastLayout(self):
         # This function just makes a dummy eastern layout to use.
         label1 = QtGui.QLabel("LArCV")
-        label2 = QtGui.QLabel("Display")
+        label2 = QtGui.QLabel("EVD 3D")
         font = label1.font()
         font.setBold(True)
         label1.setFont(font)
         label2.setFont(font)
-
-
 
         self._eastWidget = QtGui.QWidget()
         # This is the total layout
@@ -41,12 +52,14 @@ class evdgui(gui):
         self._eastLayout.addWidget(label1)
         self._eastLayout.addWidget(label2)
         self._eastLayout.addStretch(1)
-
-
+        
+        # self._paramsDrawBox = QtGui.QCheckBox("Draw Params.")
+        # self._paramsDrawBox.stateChanged.connect(self.paramsDrawBoxWorker)
+        # self._eastLayout.addWidget(self._paramsDrawBox)
+        # self._eastLayout.addStretch(1)
 
         # Now we get the list of items that are drawable:
         drawableProducts = self._event_manager.getDrawableProducts()
-        # print drawableProducts
         self._listOfRecoBoxes = []
         for product in drawableProducts:
             thisBox = recoBox(self,
@@ -57,6 +70,7 @@ class evdgui(gui):
             self._listOfRecoBoxes.append(thisBox)
             thisBox.activated[str].connect(self.recoBoxHandler)
             self._eastLayout.addWidget(thisBox)
+
         self._eastLayout.addStretch(2)
 
         self._eastWidget.setLayout(self._eastLayout)
@@ -70,9 +84,6 @@ class evdgui(gui):
         east = self.getEastLayout()
         self.slave.addWidget(east)
         self.update()
-
-        # self._eastLayout.setVisible(False)
-        # self._eastLayout.setVisible(True)
 
 
     def recoBoxHandler(self, text):

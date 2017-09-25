@@ -16,6 +16,8 @@ class view_manager(QtCore.QObject):
 
     self._selectedPlane = -1
 
+    
+
 
   def addEvdDrawer(self,plane):
     self._drawerList.append(viewport(plane))

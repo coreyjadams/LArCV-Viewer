@@ -32,6 +32,7 @@ class drawableItems(object):
 
 try:
     import pyqtgraph.opengl as gl
+    from voxel3d import voxel3d
     class drawableItems3D(object):
 
         """This class exists to enumerate the drawableItems in 3D"""
@@ -41,16 +42,7 @@ try:
             super(drawableItems3D, self).__init__()
             # items are stored as pointers to the classes (not instances)
             self._drawableClasses = collections.OrderedDict()
-            # self._drawableClasses.update({'Spacepoints': [spacepoint.spacepoint3D,"recob::SpacePoint"]})
-            # self._drawableClasses.update({'PFParticle': [pfpart.pfpart3D,"recob::PFParticle"]})
-            # self._drawableClasses.update({'Seed': [seed.seed3D,"recob::Seed"]})
-            # self._drawableClasses.update({'Vertex': [vertex.vertex3D,"recob::Vertex"]})
-            # self._drawableClasses.update({'Shower': [shower.shower3D,"recob::Shower"]})
-            # self._drawableClasses.update({'Track': [track.track3D,"recob::Track"]})
-            # self._drawableClasses.update({'Opflash': [opflash.opflash3D,"recob::OpFlash"]})
-            # self._drawableClasses.update({'MCTrack': [mctrack.mctrack3D,"sim::MCTrack"]})
-            # self._drawableClasses.update({'MCShower': [mcshower.mcshower3D,"sim::MCShower"]})
-            # self._drawableClasses.update({'Simch': [simch.simch3D,"sim::SimChannel"]})
+            self._drawableClasses.update({'Voxel3d': [voxel3d,"voxel3d"]})
 
         def getListOfTitles(self):
             return self._drawableClasses.keys()

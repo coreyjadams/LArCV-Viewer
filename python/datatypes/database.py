@@ -75,40 +75,32 @@ class recoBase(dataBase):
     def drawObjects(self, view_manager):
         pass
 
-# class recoBase3D(dataBase):
+class recoBase3D(dataBase):
 
-#     """docstring for recoBase3D"""
+    """docstring for recoBase3D"""
 
-#     def __init__(self):
-#         super(recoBase3D, self).__init__()
-#         self._drawnObjects = []
-#         self._process = None
+    def __init__(self):
+        super(recoBase3D, self).__init__()
+        self._drawnObjects = []
 
-#     def init(self):
-#         self._process.initialize()
 
-#     def clearDrawnObjects(self, view_manager):
-#         view = view_manager.getView()
-#         for item in self._drawnObjects:
-#             view.removeItem(item)
-#         # clear the list:
-#         self._drawnObjects = []
+    def clearDrawnObjects(self, view_manager):
+        view = view_manager.getView()
+        for item in self._drawnObjects:
+            view.removeItem(item)
+        # clear the list:
+        self._drawnObjects = []
 
-#     # override set producer
-#     def setProducer(self, producer):
-#         self._producerName = producer
-#         self._process.setProducer(str(producer))
+    # override set producer
+    def setProducer(self, producer):
+        self._producerName = producer
+        self._process.setProducer(str(producer))
 
-#     def getDrawnObjects(self):
-#         return self._drawnObjects
+    def getDrawnObjects(self):
+        return self._drawnObjects
 
-#     def drawObjects(self, view_manager):
-#         pass
+    def drawObjects(self, view_manager):
+        pass
 
-#     def getAutoRange(self, plane):
-#         if self._process != None:
-#             x = self._process.getXRange
-#             y = self._process.getYRange
-#             z = self._process.getZRange
-#             return [x.first, x.second], [y.first, y.second], [z.first, z.second]
-#         return None, None, None
+    def refresh(self, view_manager):
+        pass
