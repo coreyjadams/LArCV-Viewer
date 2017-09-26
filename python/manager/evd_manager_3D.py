@@ -47,6 +47,7 @@ class evd_manager_3D(evd_manager_base):
                 self._driver.override_input_file(flist)
 
         self._driver.initialize()
+        self.go_to_entry(0)
 
         self._data_product_rmap = dict()
 
