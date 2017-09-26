@@ -53,6 +53,8 @@ class voxel3d(recoBase):
         voxels = event_voxel3d.GetVoxelSet()
         self._meta = event_voxel3d.GetVoxelMeta() 
 
+        view_manager.getView().updateMeta(self._meta)
+
         self._id_summed_charge = dict()
         # # This section draws voxels onto the environment:
         for voxel in voxels:
@@ -71,14 +73,13 @@ class voxel3d(recoBase):
 
     def redraw(self, view_manager):
 
+
         if self._gl_voxel_mesh is not None:
             view_manager.getView().removeItem(self._gl_voxel_mesh)
+            self._gl_voxel_mesh = None
 
         verts, faces, colors = self.buildTriangleArray(self._id_summed_charge,
                                                        view_manager)
-
-        i =  8
-        voxel_id = self._id_summed_charge.keys()[i]
 
         #make a mesh item: 
         mesh = gl.GLMeshItem(vertexes=verts,
@@ -174,7 +175,6 @@ class voxel3d(recoBase):
     def clearDrawnObjects(self, view_manager):
         if self._gl_voxel_mesh is not None:
             view_manager.getView().removeItem(self._gl_voxel_mesh)
-            self._gl_voxel_mesh.setVisible(False)
         self._gl_voxel_mesh = None
         self._meta = None
         self._id_summed_charge = dict()

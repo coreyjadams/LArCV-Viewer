@@ -3,12 +3,12 @@ from viewport3D import viewport3D
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 
-colorMap = {'ticks': [(1, (22, 30, 151, 255)),
+colorMap = {'ticks': [(1, (151, 30, 22, 255)),
                       (0.791, (0, 181, 226, 255)),
                       (0.645, (76, 140, 43, 255)),
                       (0.47, (0, 206, 24, 255)),
                       (0.33333, (254, 209, 65, 255)),
-                      (0, (255, 255, 255, 128))],
+                      (0, (255, 255, 255, 255))],
             'mode': 'rgb'}
 
 class view_manager3D(QtCore.QObject):
@@ -25,7 +25,7 @@ class view_manager3D(QtCore.QObject):
 
         self._cmap = pg.GradientWidget(orientation='right')
         self._cmap.restoreState(colorMap)
-        self._cmap.sigGradientChanged.connect(self.colorsChanged)
+        self._cmap.sigGradientChangeFinished.connect(self.gradientChangeFinished)
         self._cmap.resize(1, 1)
 
         self._lookupTable = self._cmap.getLookupTable(255, alpha=0.75)
@@ -57,13 +57,13 @@ class view_manager3D(QtCore.QObject):
 
         self._layout.addLayout(colors)
 
+    def gradientChangeFinished(self):
+        self._lookupTable = self._cmap.getLookupTable(255, alpha=0.75)
+        self.refreshColors.emit()
 
 
-    def getLookupTable(self, scaleToUnity = True):
-        if scaleToUnity:
-            return self._lookupTable*(1./255)
-        else: 
-            return self._lookupTable
+    def getLookupTable(self):
+        return self._lookupTable*(1./255)
 
 
     def colorsChanged(self):
