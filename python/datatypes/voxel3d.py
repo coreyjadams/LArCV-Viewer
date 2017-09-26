@@ -86,9 +86,9 @@ class voxel3d(recoBase):
         print self._id_summed_charge[voxel_id]
 
         #make a mesh item: 
-        mesh = gl.GLMeshItem(vertexes=verts, 
-                             faces=faces, 
-                             faceColors=colors, 
+        mesh = gl.GLMeshItem(vertexes=verts,
+                             faces=faces,
+                             faceColors=colors,
                              smooth=False)
         # mesh.setGLOptions("additive")        
         view_manager.getView().addItem(mesh)
@@ -98,8 +98,26 @@ class voxel3d(recoBase):
         faces = None
         colors = None
 
+        print view_manager.getLevels()[0]
+
         i = 0
         for voxel_id in id_summed_charge:
+
+            # Don't draw this pixel if it's below the threshold:
+            if id_summed_charge[voxel_id] < view_manager.getLevels()[0]:
+                continue
+
+
+            this_color = self.getColor(view_manager.getLookupTable(),
+                                       view_manager.getLevels(),
+                                       id_summed_charge[voxel_id])
+
+            if colors is None:
+                colors = numpy.asarray([this_color]*12)
+            else:
+                colors = numpy.append(colors,
+                                      numpy.asarray([this_color]*12),
+                                      axis=0)
 
             # print "({}, {}, {})".format(_pos[0], _pos[1], _pos[2])
             this_verts = self.makeBox(voxel_id, self._meta)
@@ -116,16 +134,6 @@ class voxel3d(recoBase):
                 verts = numpy.append(verts, 
                                      this_verts, axis=0)
 
-            this_color = self.getColor(view_manager.getLookupTable(),
-                                       view_manager.getLevels(),
-                                       id_summed_charge[voxel_id])
-
-            if colors is None:
-                colors = numpy.asarray([this_color]*12)
-            else:
-                colors = numpy.append(colors,
-                                      numpy.asarray([this_color]*12),
-                                      axis=0)
             i += 1
 
         return verts, faces, colors
@@ -134,19 +142,19 @@ class voxel3d(recoBase):
         verts_box = numpy.copy(self._box_template)
         #Scale all the points of the box to the right voxel size:
         verts_box[:,0] *= meta.SizeVoxelX()
-        verts_box[:,2] *= meta.SizeVoxelY()
-        verts_box[:,1] *= meta.SizeVoxelZ()
+        verts_box[:,1] *= meta.SizeVoxelY()
+        verts_box[:,2] *= meta.SizeVoxelZ()
 
         #Shift the points to put the center of the cube at (0,0,0)
         verts_box[:,0] -= 0.5*meta.SizeVoxelX()
-        verts_box[:,2] -= 0.5*meta.SizeVoxelY()
-        verts_box[:,1] -= 0.5*meta.SizeVoxelZ()
+        verts_box[:,1] -= 0.5*meta.SizeVoxelY()
+        verts_box[:,2] -= 0.5*meta.SizeVoxelZ()
         
         #Move the points to the right coordinate in this space
 
         verts_box[:,0] += meta.X(voxel_id) - meta.MinX()
-        verts_box[:,2] += meta.Y(voxel_id) - meta.MinY()
-        verts_box[:,1] += meta.Z(voxel_id) - meta.MinZ()
+        verts_box[:,1] += meta.Y(voxel_id) - meta.MinY()
+        verts_box[:,2] += meta.Z(voxel_id) - meta.MinZ()
 
 
         # color_arr = numpy.ndarray((12, 4))
@@ -172,6 +180,7 @@ class voxel3d(recoBase):
     def clearDrawnObjects(self, view_manager):
         if self._gl_voxel_mesh is not None:
             view_manager.getView().removeItem(self._gl_voxel_mesh)
+            self._gl_voxel_mesh.setVisible(False)
         self._gl_voxel_mesh = None
         self._meta = None
         self._id_summed_charge = dict()
