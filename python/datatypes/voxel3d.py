@@ -15,7 +15,34 @@ class voxel3d(recoBase):
         super(voxel3d, self).__init__()
         self._productName = 'voxel3d'
         self._product_id = 5
-        self._glPointsCollection = None
+        self._gl_voxel_mesh = None
+        self._id_summed_charge = dict()
+        self._meta = None
+
+        self._box_template = numpy.array([[ 0 , 0, 0],
+                                          [ 1 , 0, 0],
+                                          [ 1 , 1, 0],
+                                          [ 0 , 1, 0],
+                                          [ 0 , 0, 1],
+                                          [ 1 , 0, 1],
+                                          [ 1 , 1, 1],
+                                          [ 0 , 1, 1]],
+                                         dtype=float)
+
+
+        self._faces_template = numpy.array([[0, 1, 2],
+                                            [0, 2, 3],
+                                            [0, 1, 4],
+                                            [1, 5, 4],
+                                            [1, 2, 5],
+                                            [2, 5, 6],
+                                            [2, 3, 6],
+                                            [3, 6, 7],
+                                            [0, 3, 7],
+                                            [0, 4, 7],
+                                            [4, 5, 7],
+                                            [5, 6, 7]])
+
 
     # this is the function that actually draws the cluster.
     def drawObjects(self, view_manager, io_manager, meta):
@@ -24,57 +51,130 @@ class voxel3d(recoBase):
         event_voxel3d = io_manager.get_data(self._product_id, str(self._producerName))
 
         voxels = event_voxel3d.GetVoxelSet()
-        meta = event_voxel3d.GetVoxelMeta()
+        self._meta = event_voxel3d.GetVoxelMeta() 
 
-
-        # using spheres at the moment:
-        self._points = numpy.ndarray((voxels.size(), 3))
-        self._color = numpy.ndarray((voxels.size(), 4))
-        self._values = numpy.ndarray((voxels.size()))
-
+        self._id_summed_charge = dict()
         # # This section draws voxels onto the environment:
-        i = 0
+        print voxels.size()
         for voxel in voxels:
-            _pos = meta.Position(voxel.ID())
-            self._points[i][0] = _pos[0] - meta.MinX()
-            self._points[i][1] = _pos[1] - meta.MinY()
-            self._points[i][2] = _pos[2] - meta.MinZ()
-            self._values[i] = voxel.Value()
-            i += 1
-            # print voxel.Value()
-
-        self.setColors(view_manager.getLookupTable(), view_manager.getLevels())
-        self.redrawPoints(view_manager)
-
-    def redrawPoints(self, view_manager):
-        if self._glPointsCollection is not None:
-            view_manager.getView().removeItem(self._glPointsCollection)
-
-        self._glPointsCollection = gl.GLScatterPlotItem(pos=self._points,
-            size=25, color=self._color)
-
-        view_manager.getView().addItem(self._glPointsCollection)
-
-    def setColors(self, _lookupTable, levels):
-        _min = levels[0]
-        _max = levels[1]
-
-        for i in xrange(len(self._values)):
-            if self._values[i] >= _max:
-                # print "Max " + str(self._values[i])
-                self._color[i] = (0,0,0,0)
-            elif self._values[i] <= _min:
-                # print "Min "  + str(self._values[i])
-                self._color[i] = (0,0,0,0)
+            if voxel.ID() in self._id_summed_charge:
+                self._id_summed_charge[voxel.ID()] += voxel.Value()
             else:
-                index = 255*(self._values[i] - _min) / (_max - _min)
-                self._color[i] = _lookupTable[int(index)]
+                self._id_summed_charge.update({voxel.ID() : voxel.Value()})
+
+        self.redraw(view_manager)
+
+
+
+
+        # self.setColors(view_manager.getLookupTable(), view_manager.getLevels())
+        # self.redraw(view_manager)
+
+    def redraw(self, view_manager):
+
+        print "Redrawing"
+        if self._gl_voxel_mesh is not None:
+            view_manager.getView().removeItem(self._gl_voxel_mesh)
+
+        verts, faces, colors = self.buildTriangleArray(self._id_summed_charge,
+                                                       view_manager)
+
+        i =  8
+        print colors[i*12:(i+1)*12]
+        voxel_id = self._id_summed_charge.keys()[i]
+        print voxel_id
+        print self._id_summed_charge[voxel_id]
+
+        #make a mesh item: 
+        mesh = gl.GLMeshItem(vertexes=verts, 
+                             faces=faces, 
+                             faceColors=colors, 
+                             smooth=False)
+        # mesh.setGLOptions("additive")        
+        view_manager.getView().addItem(mesh)
+
+    def buildTriangleArray(self, id_summed_charge, view_manager):
+        verts = None
+        faces = None
+        colors = None
+
+        i = 0
+        for voxel_id in id_summed_charge:
+
+            # print "({}, {}, {})".format(_pos[0], _pos[1], _pos[2])
+            this_verts = self.makeBox(voxel_id, self._meta)
+
+            if faces is None:
+                faces = self._faces_template
+            else:
+                faces = numpy.append(faces, 
+                                     self._faces_template + 8*i, 
+                                     axis=0)
+            if verts is None:
+                verts = this_verts
+            else:
+                verts = numpy.append(verts, 
+                                     this_verts, axis=0)
+
+            this_color = self.getColor(view_manager.getLookupTable(),
+                                       view_manager.getLevels(),
+                                       id_summed_charge[voxel_id])
+
+            if colors is None:
+                colors = numpy.asarray([this_color]*12)
+            else:
+                colors = numpy.append(colors,
+                                      numpy.asarray([this_color]*12),
+                                      axis=0)
+            i += 1
+
+        return verts, faces, colors
+
+    def makeBox(self, voxel_id, meta):
+        verts_box = numpy.copy(self._box_template)
+        #Scale all the points of the box to the right voxel size:
+        verts_box[:,0] *= meta.SizeVoxelX()
+        verts_box[:,2] *= meta.SizeVoxelY()
+        verts_box[:,1] *= meta.SizeVoxelZ()
+
+        #Shift the points to put the center of the cube at (0,0,0)
+        verts_box[:,0] -= 0.5*meta.SizeVoxelX()
+        verts_box[:,2] -= 0.5*meta.SizeVoxelY()
+        verts_box[:,1] -= 0.5*meta.SizeVoxelZ()
+        
+        #Move the points to the right coordinate in this space
+
+        verts_box[:,0] += meta.X(voxel_id) - meta.MinX()
+        verts_box[:,2] += meta.Y(voxel_id) - meta.MinY()
+        verts_box[:,1] += meta.Z(voxel_id) - meta.MinZ()
+
+
+        # color_arr = numpy.ndarray((12, 4))
+        # color_arr[:] = [1,1,1,1]
+
+        return verts_box
+
+    def getColor(self, _lookupTable, _levels, _voxel_value ):
+        _min = _levels[0]
+        _max = _levels[1]
+
+        if _voxel_value > _max:
+            # print "Max " + str(_voxel_value)
+            return _lookupTable[-1]
+        elif _voxel_value < _min:
+            # print "Min "  + str(_voxel_value)
+            return (0,0,0,0)
+        else:
+            index = 255*(_voxel_value - _min) / (_max - _min)
+            return _lookupTable[int(index)]
+
 
     def clearDrawnObjects(self, view_manager):
-        if self._glPointsCollection is not None:
-            view_manager.getView().removeItem(self._glPointsCollection)
-        self._glPointsCollection = None
+        if self._gl_voxel_mesh is not None:
+            view_manager.getView().removeItem(self._gl_voxel_mesh)
+        self._gl_voxel_mesh = None
+        self._meta = None
+        self._id_summed_charge = dict()
 
     def refresh(self, view_manager):
-        self.setColors(view_manager.getLookupTable(), view_manager.getLevels())
-        self.redrawPoints(view_manager)
+        self.redraw(view_manager)

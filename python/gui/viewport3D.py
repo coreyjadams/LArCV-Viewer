@@ -44,7 +44,8 @@ class viewport3D(gl.GLViewWidget):
         # This section prepares the 3D environment:
         # Add an axis orientation item:
         self._axis = gl.GLAxisItem()
-        self._axis.setSize(x=0.25*_len_x, y=0.25*_len_y, z=0.25*_len_z)
+        # self._axis.setSize(x=_len_x, y=_len_y, z=_len_z)
+        self._axis.setSize(x=_len_x, y=0.25*_len_y, z=0.25*_len_z)
         self.addItem(self._axis)
     
         # Add a set of grids along x, y, z:
