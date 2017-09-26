@@ -55,7 +55,6 @@ class voxel3d(recoBase):
 
         self._id_summed_charge = dict()
         # # This section draws voxels onto the environment:
-        print voxels.size()
         for voxel in voxels:
             if voxel.ID() in self._id_summed_charge:
                 self._id_summed_charge[voxel.ID()] += voxel.Value()
@@ -72,7 +71,6 @@ class voxel3d(recoBase):
 
     def redraw(self, view_manager):
 
-        print "Redrawing"
         if self._gl_voxel_mesh is not None:
             view_manager.getView().removeItem(self._gl_voxel_mesh)
 
@@ -80,10 +78,7 @@ class voxel3d(recoBase):
                                                        view_manager)
 
         i =  8
-        print colors[i*12:(i+1)*12]
         voxel_id = self._id_summed_charge.keys()[i]
-        print voxel_id
-        print self._id_summed_charge[voxel_id]
 
         #make a mesh item: 
         mesh = gl.GLMeshItem(vertexes=verts,
@@ -91,14 +86,13 @@ class voxel3d(recoBase):
                              faceColors=colors,
                              smooth=False)
         # mesh.setGLOptions("additive")        
+        self._gl_voxel_mesh = mesh
         view_manager.getView().addItem(mesh)
 
     def buildTriangleArray(self, id_summed_charge, view_manager):
         verts = None
         faces = None
         colors = None
-
-        print view_manager.getLevels()[0]
 
         i = 0
         for voxel_id in id_summed_charge:
