@@ -25,7 +25,8 @@ class view_manager3D(QtCore.QObject):
 
         self._cmap = pg.GradientWidget(orientation='right')
         self._cmap.restoreState(colorMap)
-        self._cmap.sigGradientChangeFinished.connect(self.gradientChangeFinished)
+        self._cmap.sigGradientChanged.connect(self.gradientChangeFinished)
+        # self._cmap.sigGradientChangeFinished.connect(self.gradientChangeFinished)
         self._cmap.resize(1, 1)
 
         self._lookupTable = self._cmap.getLookupTable(255, alpha=0.75)

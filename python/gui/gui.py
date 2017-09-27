@@ -100,9 +100,9 @@ class gui(QtGui.QWidget):
       event = int(self._fileEntry.text())
     except:
       print("Error, must enter an integer")
-      self._fileEntry.setText(str(self._event_manager.event()))
+      self._fileEntry.setText(str(self._event_manager.entry()))
       return
-    self._event_manager.goToEvent(event)
+    self._event_manager.go_to_entry(event)
 
   # This function prepares the range controlling options and returns a layout
   def getDrawingControlButtons(self):

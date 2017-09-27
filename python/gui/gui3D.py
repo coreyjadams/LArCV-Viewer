@@ -173,9 +173,9 @@ class gui3D(QtGui.QWidget):
       event = int(self._entryBox.text())
     except:
       print "Error, must enter an integer"
-      self._entryBox.setText(str(self._event_manager.event()))
+      self._entryBox.setText(str(self._event_manager.entry()))
       return
-    self._event_manager.goToEvent(event)
+    self._event_manager.go_to_entry(event)
 
   # This function prepares the range controlling options and returns a layout
   def getDrawingControlButtons(self):
@@ -491,7 +491,7 @@ class gui3D(QtGui.QWidget):
     r = self._event_manager.run()
     e = self._event_manager.event()
     s = self._event_manager.subrun()
-    name = "evd3D_" + self._geometry.name() + "_R" + str(r)
+    name = "larcv_3D_" + "R" + str(r)
     name = name + "_S" + str(s)
     name = name + "_E" + str(e) + ".png"
     f = dialog.getSaveFileName(self,"Save File",name,
@@ -499,7 +499,7 @@ class gui3D(QtGui.QWidget):
 
     # print filt
     # Print
-    if pg.Qt.QT_LIB == pg.Qt.PYQT4:
+    if (pg.Qt.QtVersion.startswith('4')):
       pixmapImage = QtGui.QPixmap.grabWidget(self)
       pixmapImage.save(f,"PNG")
     else:
